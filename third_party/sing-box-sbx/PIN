@@ -1,0 +1,5 @@
+reF1nd/sing-box v1.15.0-alpha.13-reF1nd
+NetBOX overlay from NetSBX third_party/sing-box-sbx
+xhttp / VLESS encryption / Reality MLKEM hello / mldsa65Verify / SessionId 26.10.31
+Applied after AndroidLibBoxLite patches/; then MlkemEcdhe fallback + unsafe fingerprint block
+Build tags: BOX local set + with_xhttp (keep openvpn/openconnect/naive/ebpf)

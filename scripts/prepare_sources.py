@@ -3,6 +3,8 @@ import pathlib
 import re
 import shutil
 
+import subprocess
+
 from reality_compat import REALITY_FILES, REALITY_PATCHES
 
 ENVIRONMENT = 'github.com/sagernet/sing-box/common/androidcli'
@@ -106,6 +108,44 @@ def inject_patches(repo, core):
         shutil.copyfile(source, destination)
 
 
+def apply_sbx_overlay(repo, core):
+    # Overlay after BOX staging patches so xhttp/enc/pqv replace upstream files
+    # without dropping later BOX-only Reality fallbacks applied below.
+    script = repo / 'scripts/apply-sbx-kernel.sh'
+    if not script.is_file():
+        raise ValueError(f'Missing overlay script: {script}')
+    subprocess.run(['sh', str(script), str(core)], check=True)
+    overlay_reality = core / 'common/tls/reality_client.go'
+    text = overlay_reality.read_text(encoding='utf-8')
+    text = replace_once(
+        text,
+        '\tecdheKey := keyShareKeys.Ecdhe\n'
+        '\tif ecdheKey == nil {\n'
+        '\t\treturn nil, nil, E.New("nil ecdheKey")\n'
+        '\t}\n',
+        '\tecdheKey := keyShareKeys.Ecdhe\n'
+        '\tif ecdheKey == nil {\n'
+        '\t\tecdheKey = keyShareKeys.MlkemEcdhe\n'
+        '\t}\n'
+        '\tif ecdheKey == nil {\n'
+        '\t\treturn nil, nil, E.New("nil ecdheKey")\n'
+        '\t}\n',
+    )
+    text = replace_once(
+        text,
+        '\tif options.Spoof != "" || options.SpoofMethod != "" {\n'
+        '\t\treturn nil, E.New("spoof is unsupported in reality")\n'
+        '\t}\n',
+        '\tif strings.EqualFold(options.UTLS.Fingerprint, "unsafe") || strings.EqualFold(options.UTLS.Fingerprint, "hellogolang") {\n'
+        '\t\treturn nil, E.New("unsupported REALITY fingerprint: ", options.UTLS.Fingerprint)\n'
+        '\t}\n'
+        '\tif options.Spoof != "" || options.SpoofMethod != "" {\n'
+        '\t\treturn nil, E.New("spoof is unsupported in reality")\n'
+        '\t}\n',
+    )
+    overlay_reality.write_text(text, encoding='utf-8')
+
+
 def prepare_sources(repo, core):
     # Do not change the module cache or maintain a second copy of upstream APIs.
     environment = core / 'common/androidcli'
@@ -117,6 +157,7 @@ def prepare_sources(repo, core):
                     ignore=shutil.ignore_patterns('*_test.go', 'java'))
     inject_patches(repo, core)
     patch_sources(core)
+    apply_sbx_overlay(repo, core)
     injected = {(core / destination_rel).resolve() for _, destination_rel in INJECTED_FILES}
     for original in core.rglob('*.go'):
         if original.name.endswith('_test.go') or original.is_relative_to(environment):

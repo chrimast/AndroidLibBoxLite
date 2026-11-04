@@ -2,6 +2,8 @@
 
 Android `libbox.aar` built from [reF1nd/sing-box](https://github.com/reF1nd/sing-box), with gomobile Java bindings and a CLI sharing one Go native library.
 
+This fork (`chrimast/AndroidLibBoxLite`, branch `feat/xhttp-overlay`) copies the NetSBX client overlay from `third_party/sing-box-sbx` onto the staged reF1nd tree after BOX patches, then restores BOX Reality `MlkemEcdhe` fallback. `build_tags.txt` includes `with_xhttp`. JNI `libbox.so` and the ROOT CLI must be built from the same overlay.
+
 ## Contents
 
 Each Android ABI (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`) contains:
