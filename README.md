@@ -4,6 +4,8 @@ Android `libbox.aar` built from [reF1nd/sing-box](https://github.com/reF1nd/sing
 
 This fork (`chrimast/AndroidLibBoxLite`, branch `feat/xhttp-overlay`) copies the NetSBX client overlay from `third_party/sing-box-sbx` onto the staged reF1nd tree after BOX patches, then restores BOX Reality `MlkemEcdhe` fallback. `build_tags.txt` includes `with_xhttp`. JNI `libbox.so` and the ROOT CLI must be built from the same overlay.
 
+Keep only two GitHub forks for the NetBOX line: this repo and [chrimast/NetBOX](https://github.com/chrimast/NetBOX). Magisk lives in standalone [chrimast/NetSBX](https://github.com/chrimast/NetSBX) (not a fork of NetProxy). Do not fork `reF1nd/sing-box` or `Leadaxe/sing-box-lx`; copy client overlay files instead. Do not drop this AAR onto NetSBX `bin/sing-box`.
+
 ## Contents
 
 Each Android ABI (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`) contains:
